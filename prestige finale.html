@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur Budgétaire Luxe - Prestige </title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Styles modernes de luxe : Palette premium or/noir/blanc, effets digitaux */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Playfair Display', serif; }
+        body { background: linear-gradient(135deg, #000, #333); color: #fff; line-height: 1.6; padding: 20px; overflow-x: hidden; }
+        header { text-align: center; margin-bottom: 40px; padding: 20px; background: rgba(255, 215, 0, 0.1); border-radius: 15px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+        h1 { font-size: 3em; color: #FFD700; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        .container { max-width: 1000px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); color: #000; padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .section { margin-bottom: 40px; padding: 20px; border: 1px solid #FFD700; border-radius: 10px; background: #f9f9f9; }
+        label { display: block; margin-bottom: 8px; font-weight: 700; color: #333; }
+        input, select, button { width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #FFD700; border-radius: 8px; font-size: 1.1em; transition: all 0.4s ease; background: #fff; }
+        input:focus, select:focus { border-color: #FFA500; outline: none; box-shadow: 0 0 10px rgba(255, 165, 0, 0.5); }
+        button { background: linear-gradient(45deg, #FFD700, #FFA500); color: #000; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        button:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(255, 215, 0, 0.7); }
+        .result { background: #fff; padding: 20px; border-radius: 10px; margin-top: 15px; border: 1px solid #FFD700; }
+        .cart { list-style: none; padding: 0; }
+        .cart li { padding: 15px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; font-weight: 600; }
+        .total { font-size: 1.5em; font-weight: bold; color: #FFD700; text-align: center; margin-top: 20px; }
+        .chart-container { margin-top: 20px; height: 300px; background: #fff; border-radius: 10px; padding: 10px; }
+        .integration { text-align: center; margin-bottom: 20px; }
+        .backoffice { display: none; background: #000; color: #FFD700; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        footer { text-align: center; margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #000, #333); color: #FFD700; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+        footer .logo { font-size: 2em; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; }
+        footer .logo i { margin-right: 10px; color: #FFD700; }
+        footer .social-icons { margin: 20px 0; }
+        footer .social-icons a { margin: 0 15px; color: #FFD700; font-size: 1.5em; transition: all 0.3s; text-decoration: none; }
+        footer .social-icons a:hover { color: #FFA500; transform: scale(1.2); }
+        footer p { margin-top: 20px; font-size: 0.9em; }
+        /* Modales */
+        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 10px; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+        .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+        @media (max-width: 600px) { h1 { font-size: 2.5em; } .container { padding: 20px; } footer { padding: 20px; } footer .logo { font-size: 1.5em; } footer .social-icons a { font-size: 1.2em; } }
+    </style>
+</head>
+<body>
+    <header id="siteHeader">
+        <h1>Calculateur Budgétaire Luxe - Prestige</h1>
+        <p>Outil digital de luxe pour gérer vos ventes B2C : marges, TVA, bénéfices, et caisse enregistreuse automatique.</p>
+        <button onclick="toggleBackoffice()">Admin Backoffice</button>
+    </header>
+    <div class="container">
+        <div class="integration">
+            <h2>Intégrations Digitales</h2>
+            <button onclick="openModal('facebookModal')">Lier à API Facebook Ads</button>
+            <button onclick="openModal('venteModal')">Lier au Site de Vente</button>
+        </div>
+        
+        <div class="section">
+            <h2>Calculateur d'Article</h2>
+            <label for="prixAchat">Prix d'Achat (HT) :</label>
+            <input type="number" id="prixAchat" step="0.01" placeholder="Ex: 10.00">
+            
+            <label for="marge">Marge (%) :</label>
+            <input type="number" id="marge" step="0.01" placeholder="Ex: 50">
+            
+            <label for="pays">Choisir le Pays (TVA) :</label>
+            <select id="pays">
+                <!-- Europe -->
+                <option value="20">France - 20%</option>
+                <option value="19">Allemagne - 19%</option>
+                <option value="22">Italie - 22%</option>
+                <option value="21">Espagne - 21%</option>
+                <option value="25">Suède - 25%</option>
+                <option value="23">Danemark - 23%</option>
+                <option value="21">Pays-Bas - 21%</option>
+                <option value="20">Belgique - 20%</option>
+                <option value="20">Suisse - 20%</option>
+                <option value="20">Autriche - 20%</option>
+                <option value="23">Finlande - 23%</option>
+                <option value="21">Portugal - 21%</option>
+                <option value="20">Irlande - 20%</option>
+                <option value="20">Luxembourg - 20%</option>
+                <option value="21">Grèce - 21%</option>
+                <option value="20">Royaume-Uni - 20%</option>
+                <option value="18">Turquie - 18%</option>
+                <option value="20">Pologne - 20%</option>
+                <option value="21">Hongrie - 21%</option>
+                <option value="20">République Tchèque - 20%</option>
+                <!-- Afrique -->
+                <option value="19">Algérie - 19%</option>
+                <option value="20">Maroc - 20%</option>
+                <option value="19">Tunisie - 19%</option>
+                <option value="14">Égypte - 14%</option>
+                <option value="15">Afrique du Sud - 15%</option>
+                <option value="18">Nigeria - 18%</option>
+                <option value="18">Kenya - 18%</option>
+                <option value="16">Ghana - 16%</option>
+                <option value="18">Sénégal - 18%</option>
+                <option value="19">Côte d'Ivoire - 19%</option>
+                <!-- Asie -->
+                <option value="10">Japon - 10%</option>
+                <option value="18">Inde - 18%</option>
+                <option value="17">Chine - 17%</option>
+                <option value="15">Corée du Sud - 15%</option>
+                <option value="12">Singapour - 12%</option>
+                <option value="10">Malaisie - 10%</option>
+                <option value="10">Thaïlande - 10%</option>
+                <option value="12">Indonésie - 12%</option>
+                <option value="15">Philippines - 15%</option>
+                <option value="18">Vietnam - 18%</option>
+                <option value="12">Israël - 12%</option>
+                <option value="18">Arabie Saoudite - 18%</option>
+                <option value="5">Émirats Arabes Unis - 5%</option>
+                <!-- Amériques -->
+                <option value="0">États-Unis - 0% (varie par État)</option>
+                <option value="5">Canada - 5% (fédéral, varie)</option>
+                <option value="17">Brésil - 17%</option>
+                <option value="16">Mexique - 16%</option>
+                <option value="19">Argentine - 19%</option>
+                <option value="19">Chili - 19%</option>
+                <option value="18">Colombie - 18%</option>
+                <option value="12">Pérou - 12%</option>
+                <!-- Océanie -->
+                <option value="10">Australie - 10%</option>
+                <option value="15">Nouvelle-Zélande - 15%</option>
+            </select>
+            
+            <label for="quantite">Quantité :</label>
+            <input type="number" id="quantite" value="1" min="1">
+            
+            <button onclick="calculerArticle()">Calculer Article en Temps Réel</button>
+            <script>
+                document.getElementById('prixAchat').addEventListener('input', calculerArticle);
+                document.getElementById('marge').addEventListener('input', calculerArticle);
+                document.getElementById('pays').addEventListener('change', calculerArticle);
+                document.getElementById('quantite').addEventListener('input', calculerArticle);
+            </script>
+            <button onclick="ajouterAuPanier()">Ajouter au Panier</button>
+            
+            <div class="result" id="resultatArticle">
+                <p><strong>Prix de Vente HT :</strong> <span id="prixVenteHT">0.00 DZD</span></p>
+                <p><strong>Prix de Vente TTC :</strong> <span id="prixVenteTTC">0.00 DZD</span></p>
+                <p><strong>Bénéfice par Article :</strong> <span id="benefice">0.00 DZD</span></p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Panier (Caisse Enregistreuse)</h2>
+            <ul class="cart" id="panier"></ul>
+            <div class="total">Total TTC : <span id="totalPanier">0.00 DZD</span></div>
+            <button onclick="viderPanier()">Vider le Panier</button>
+            <button onclick="calculerArticle()">Mettre à jour en Temps Réel</button>
+            <button onclick="genererRecu()">Générer Reçu</button>
+        </div>
+        
+        <div class="section">
+            <h2>Visualisations Graphiques (Marges & Bénéfices)</h2>
+            <button onclick="updateCharts()">Rafraîchir Graphiques</button>
+            <script>
+                // Mettre à jour les graphiques en temps réel
+                function updateCharts() {
+                    const prixAchat = parseFloat(document.getElementById('prixAchat').value) || 0;
+                    const marge = parseFloat(document.getElementById('marge').value) || 0;
+                    const tva = parseFloat(document.getElementById('pays').value) || 0;
+                    
+                    if (prixAchat > 0) {
+                        const prixVenteHT = prixAchat * (1 + marge / 100);
+                        const benefice = prixVenteHT - prixAchat;
+                        
+                        creerChartMarges(prixAchat, benefice, prixVenteHT);
+                        creerChartBenefices(panier);
+                    }
+                }
+                
+                // Appeler au chargement et lors des changements
+                document.getElementById('prixAchat').addEventListener('input', updateCharts);
+                document.getElementById('marge').addEventListener('input', updateCharts);
+                document.getElementById('pays').addEventListener('change', updateCharts);
+                updateCharts();
+            </script>
+            <div class="chart-container">
+                <canvas id="chartMarges"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartBenefices"></canvas>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Design Graphique des Ventes (Prestigieux)</h2>
+            <button onclick="updateVentesCharts()">Rafraîchir Graphiques Ventes</button>
+            <script>
+                // Mettre à jour les graphiques de ventes en temps réel
+                function updateVentesCharts() {
+                    const prixAchat = parseFloat(document.getElementById('prixAchat').value) || 0;
+                    const marge = parseFloat(document.getElementById('marge').value) || 0;
+                    const quantite = parseFloat(document.getElementById('quantite').value) || 1;
+                    
+                    if (prixAchat > 0) {
+                        const prixVenteHT = prixAchat * (1 + marge / 100);
+                        const revenus = prixVenteHT * quantite;
+                        creerChartVentesRevenus(panier, revenus);
+                        creerChartVentesCategories(panier);
+                    }
+                }
+                
+                // Appeler au chargement et lors des changements
+                document.getElementById('prixAchat').addEventListener('input', updateVentesCharts);
+                document.getElementById('marge').addEventListener('input', updateVentesCharts);
+                document.getElementById('quantite').addEventListener('input', updateVentesCharts);
+                updateVentesCharts();
+            </script>
+            <div class="chart-container">
+                <canvas id="chartVentesRevenus"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartVentesCategories"></canvas>
+            </div>
+        </div>
+        
+        <div class="backoffice" id="backoffice">
+            <h3>Backoffice - Éditer le Site</h3>
+            <label>Header :</label>
+            <textarea id="editHeader" rows="3"></textarea>
+            <label>Contenu Principal :</label>
+            <textarea id="editContent" rows="5"></textarea>
+            <label>Footer :</label>
+            <textarea id="editFooter" rows="3"></textarea>
+            <button onclick="sauvegarderEdits()">Sauvegarder</button>
+            <button onclick="chargerEdits()">Charger</button>
+        </div>
+    </div>
+    
+    <!-- Modale Admin Backoffice -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('adminModal')">&times;</span>
+            <h2>Inscription Admin</h2>
+            <label for="adminUser">Nom d'Utilisateur :</label>
+            <input type="text" id="adminUser" placeholder="Entrez votre nom d'utilisateur">
+            <label for="adminEmail">Email :</label>
+            <input type="email" id="adminEmail" placeholder="Entrez votre email">
+            <label for="adminPass">Mot de Passe :</label>
+            <input type="password" id="adminPass" placeholder="Entrez votre mot de passe">
+            <label for="adminPassConfirm">Confirmer le Mot de Passe :</label>
+            <input type="password" id="adminPassConfirm" placeholder="Confirmez votre mot de passe">
+            <button onclick="inscrireAdmin()">S'inscrire</button>
+            <p id="messageInscription" style="margin-top: 15px; text-align: center;"></p>
+        </div>
+    </div>
+    
+    <!-- Modale API Facebook Ads -->
+    <div id="facebookModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('facebookModal')">&times;</span>
+            <h2>Lier à API Facebook Ads</h2>
+            <label for="facebookAppId">App ID :</label>
+            <input type="text" id="facebookAppId" placeholder="Entrez votre App ID">
+            <label for="facebookToken">Access Token :</label>
+            <input type="text" id="facebookToken" placeholder="Entrez votre Access Token">
+            <label for="facebookPixelId">Pixel ID :</label>
+            <input type="text" id="facebookPixelId" placeholder="Entrez votre Pixel ID">
+            <button onclick="lierFacebook()">Lier</button>
+            <div id="facebookStatus" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
+        </div>
+    </div>
+    
+    <!-- Modale Site de Vente -->
+    <div id="venteModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('venteModal')">&times;</span>
+            <h2>Lier au Site de Vente</h2>
+            <label for="venteUrl">URL du Site :</label>
+            <input type="url" id="venteUrl" placeholder="Entrez l'URL de votre site de vente">
+            <button onclick="lierVente()">Lier et Ouvrir</button>
+            <div id="venteStatus" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
+        </div>
+    </div>
+    
+    <footer id="siteFooter">
+        <div class="logo">
+            <i class="fas fa-gem"></i> Prestige
+        </div>
+        <div class="social-icons">
+            <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+        </div>
+        <p>&copy; 2025-2024 Prestige. Tous droits réservés.</p>
+    </footer>
+    
+    <script>
+        // Variables globales
+        let panier = JSON.parse(localStorage.getItem('panier')) || [];
+       
